@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VPCStack } from '../lib/vpc-stack';
+import { IAMStack } from '../lib/iam-stack';
 import { EcsBaseStack } from '../lib/ecs-base-stack';
 
 const app = new cdk.App();
@@ -25,6 +26,12 @@ const vpcStack = new VPCStack(app, `VPCStack-${envName}`, {
   ...commonProps,
   envName,
   vpcCidr,
+});
+
+
+const iamStack = new IAMStack(app, `IAMStack-${envName}`, {
+  ...commonProps,
+  envName,
 });
 
 // new EcsBaseStack(app, `EcsBase-${envName}`, {
