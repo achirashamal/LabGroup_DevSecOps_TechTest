@@ -1,0 +1,23 @@
+{
+  "name": "ecs-secrets-ssm",
+  "version": "0.1.0",
+  "bin": { "ecs-secrets-ssm": "bin/app.js" },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy",
+    "destroy": "cdk destroy",
+    "test": "npm run build && jest dist/test --testMatch \"**/*.test.js\" --testPathIgnorePatterns \"/node_modules/\""
+  },
+  "devDependencies": {
+    "aws-cdk-lib": "2.154.0",
+    "constructs": "10.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.6.3",
+    "@types/node": "^20.14.10",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12"
+  }
+}
