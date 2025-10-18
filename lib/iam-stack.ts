@@ -4,16 +4,13 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
-
 export interface IAMStackProps extends StackProps {
   envName: string;
 }
 
 export class IAMStack extends Stack {
-
   public readonly taskRole: iam.Role;
   public readonly executionRole: iam.Role;
-
   public readonly secretsAccessPolicy: iam.PolicyStatement;
   public readonly parametersAccessPolicy: iam.PolicyStatement;
 
@@ -58,8 +55,6 @@ export class IAMStack extends Stack {
       },
     });
 
-
-
     // SSM Parameter Store access policies
     this.parametersAccessPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -82,9 +77,6 @@ export class IAMStack extends Stack {
       },
     });
 
-
-    
-
     // CloudWatch permissions
     const logsPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -93,14 +85,12 @@ export class IAMStack extends Stack {
         'logs:PutLogEvents',
         'logs:CreateLogGroup',
       ],
-      resources: [`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/ecs/tenant-mgmt-*`],
+      resources: ['*'],
     });
 
     // Attach policies to task role
     this.taskRole.addToPolicy(this.secretsAccessPolicy);
-
     this.taskRole.addToPolicy(this.parametersAccessPolicy);
-
     this.taskRole.addToPolicy(logsPolicy);
 
     Tags.of(this).add('Stack', 'Security');
