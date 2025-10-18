@@ -2,6 +2,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VPCStack } from '../lib/vpc-stack';
 import { ServiceStack } from '../lib/service-stack';
+import { MonitoringStack } from '../lib/monitoring-stack';
 import { EcsBaseStack } from '../lib/ecs-base-stack';
 
 const app = new cdk.App();
@@ -41,7 +42,18 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${envName}`, {
   memory,
 });
 
-// serviceStack.addDependency(vpcStack);
+const monitoringStack = new MonitoringStack(app, `MonitoringStack-${envName}`, {
+  ...commonProps,
+  envName,
+  cluster: serviceStack.cluster,
+  service: serviceStack.service,
+  loadBalancer: serviceStack.loadBalancer,
+});
+
+
+serviceStack.addDependency(vpcStack);
+monitoringStack.addDependency(serviceStack);
+
 // serviceStack.addDependency(iamStack);
 
 
