@@ -124,7 +124,7 @@ export class ServiceStack extends Stack {
         'logs:PutLogEvents',
         'logs:CreateLogGroup',
       ],
-      resources: ['*'],
+      resources: [`arn:aws:logs:${this.region}:${this.account}:log-group:/aws/ecs/tenant-mgmt-*`],
     });
 
     // Attach policies to task role
@@ -157,7 +157,7 @@ export class ServiceStack extends Stack {
         AWS_REGION: this.region,
       },
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f http://localhost/ || exit 1'],
+        command: ['CMD-SHELL', 'curl -f http://localhost/ || exit 1'], // need to point to actual healthcheck path
         interval: Duration.seconds(30),
         timeout: Duration.seconds(5),
         retries: 3,

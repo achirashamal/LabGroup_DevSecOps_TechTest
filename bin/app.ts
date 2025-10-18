@@ -3,7 +3,6 @@ import * as cdk from 'aws-cdk-lib';
 import { VPCStack } from '../lib/vpc-stack';
 import { ServiceStack } from '../lib/service-stack';
 import { MonitoringStack } from '../lib/monitoring-stack';
-import { EcsBaseStack } from '../lib/ecs-base-stack';
 
 const app = new cdk.App();
 
@@ -31,8 +30,6 @@ const vpcStack = new VPCStack(app, `VPCStack-${envName}`, {
   vpcCidr,
 });
 
-
-
 const serviceStack = new ServiceStack(app, `ServiceStack-${envName}`, {
   ...commonProps,
   envName,
@@ -50,15 +47,6 @@ const monitoringStack = new MonitoringStack(app, `MonitoringStack-${envName}`, {
   loadBalancer: serviceStack.loadBalancer,
 });
 
-
+// To maintain creation flow
 serviceStack.addDependency(vpcStack);
 monitoringStack.addDependency(serviceStack);
-
-// serviceStack.addDependency(iamStack);
-
-
-
-// new EcsBaseStack(app, `EcsBase-${envName}`, {
-//   envName,
-//   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-// });
