@@ -6,8 +6,10 @@ import {
   aws_elasticloadbalancingv2 as elbv2,
   aws_iam as iam,
   aws_logs as logs,
+  aws_kms as kms,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { KMSStack } from './kms-stack'; 
 
 export interface ServiceStackProps extends StackProps {
   envName: string;
@@ -15,6 +17,7 @@ export interface ServiceStackProps extends StackProps {
   desiredCount: number;
   cpu: number;
   memory: number;
+  secretsKey?: kms.Key;
 }
 
 export class ServiceStack extends Stack {
@@ -30,6 +33,7 @@ export class ServiceStack extends Stack {
       desiredCount,
       cpu,
       memory,
+      secretsKey,
     } = props;
 
     // Security Group for the service
@@ -70,6 +74,19 @@ export class ServiceStack extends Stack {
     const taskRole = new iam.Role(this, 'TaskRole', {
       assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       description: 'Task role for tenant management service',
+    });
+
+    // KMS Permissions for encryption/decryption
+    const kmsPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'kms:Encrypt',
+        'kms:Decrypt',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:DescribeKey',
+      ],
+      resources: secretsKey ? [secretsKey.keyArn] : ['*'],
     });
 
     // Secrets Manager permissions
@@ -131,6 +148,8 @@ export class ServiceStack extends Stack {
     taskRole.addToPolicy(secretsAccessPolicy);
     taskRole.addToPolicy(parametersAccessPolicy);
     taskRole.addToPolicy(logsPolicy);
+    taskRole.addToPolicy(kmsPolicy);
+    
 
     // Task Definition
     const taskDef = new ecs.FargateTaskDefinition(this, 'TaskDef', {
@@ -209,7 +228,7 @@ export class ServiceStack extends Stack {
     });
 
     Tags.of(this).add('Stack', 'Service');
-    Tags.of(fargateService.service).add('Service', 'tenant-management');
+    Tags.of(fargateService.service).add('Name', `tenant-mgmt-vpc-${envName}`);
 
     new CfnOutput(this, 'LoadBalancerDNS', {
       value: fargateService.loadBalancer.loadBalancerDnsName,

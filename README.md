@@ -69,6 +69,8 @@ Aim for 1-2 hours. Focus on correctness, clarity, and judgment over completeness
 
  - Deploy
     ```
+    cdk bootstrap aws://ACCOUNT-NUMBER/REGION
+    cdk synth
     cdk deploy --context env=dev --context desiredCount=2
     ```
  - Test for success : SSH to a EC2 with in the VPC and run curl command to resolve healthcheck endpoint
@@ -86,7 +88,7 @@ Aim for 1-2 hours. Focus on correctness, clarity, and judgment over completeness
 - Utilising VPC endpoints to prevent public data flow
 
 6. **How are you managing encryption for resources that are accessed by multiple applications?**
-Can improve this stack to use KMS key (Key policies with cross-account access if needed). Set IAM conditions based on environment ( dev/test/prod). And enabled automatic key rotation.
+Created a dedicated, centralized encryption key, providing a single point of control for auditing while allowing fine-grained, environment-specific, and service-specific access through key policies and IAM roles.
 
 7. **Are there any configurations that you think should be applied to other applications that use resources created by this service? What are they and why would you suggest them?**
    Other applications should be in same VPC or other VPCs need to be conneted to this VPC. Can utilise VPC peering , Transit gateways or Site-to-Site connections to enable connection between multiple VPCs. 

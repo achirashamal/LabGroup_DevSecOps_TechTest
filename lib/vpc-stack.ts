@@ -60,6 +60,10 @@ export class VPCStack extends Stack {
       service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
     });
 
+    this.vpc.addInterfaceEndpoint('KMSEndpoint', {
+      service: ec2.InterfaceVpcEndpointAwsService.KMS,
+    });
+
     Tags.of(this).add('Stack', 'Network');
     Tags.of(this.vpc).add('Name', `tenant-mgmt-vpc-${envName}`);
 

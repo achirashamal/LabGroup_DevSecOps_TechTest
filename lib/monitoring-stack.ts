@@ -107,5 +107,6 @@ export class MonitoringStack extends Stack {
     );
 
     Tags.of(this).add('Stack', 'Monitoring');
+    Tags.of(this).add('Name', `tenant-mgmt-vpc-${envName}`);
   }
 }

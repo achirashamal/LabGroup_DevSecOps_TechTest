@@ -3,10 +3,12 @@ import * as cdk from 'aws-cdk-lib';
 import { VPCStack } from '../lib/vpc-stack';
 import { ServiceStack } from '../lib/service-stack';
 import { MonitoringStack } from '../lib/monitoring-stack';
+import { KMSStack } from '../lib/kms-stack'; 
 
 describe('Test Tenant Management Service Stacks', () => {
   let app: cdk.App;
   let vpcStack: VPCStack;
+  let kmsStack: KMSStack;
   let serviceStack: ServiceStack;
   let monitoringStack: MonitoringStack;
 
@@ -24,6 +26,11 @@ describe('Test Tenant Management Service Stacks', () => {
     vpcStack = new VPCStack(app, 'VPCStack', {
       envName: 'test',
       vpcCidr: '10.0.0.0/16',
+      env: { account: '123456789012', region: 'us-east-1' },
+    });
+
+    kmsStack = new KMSStack(app, 'KMSStack', {
+      envName: 'test',
       env: { account: '123456789012', region: 'us-east-1' },
     });
 
@@ -54,6 +61,22 @@ describe('Test Tenant Management Service Stacks', () => {
     });
   });
 
+    test('KMS Stack', () => {
+    const template = Template.fromStack(kmsStack);
+
+    template.resourceCountIs('AWS::KMS::Key', 1);
+    template.resourceCountIs('AWS::KMS::Alias', 1);
+
+    template.hasResourceProperties('AWS::KMS::Key', {
+      Description: 'KMS Key for Tenant Management Service secrets and parameters - test',
+      EnableKeyRotation: true
+    });
+
+    template.hasResourceProperties('AWS::KMS::Alias', {
+      AliasName: 'alias/tenant-mgmt-key-test'
+    });
+  });
+
   test('Service Stack creates ECS service with IAM roles', () => {
     const template = Template.fromStack(serviceStack);
 
@@ -79,8 +102,8 @@ describe('Test Tenant Management Service Stacks', () => {
     serviceTemplate.hasResourceProperties('AWS::ECS::Service', {
         Tags: Match.arrayWith([
           Match.objectLike({
-            Key: 'Service',
-            Value: 'tenant-management'
+            Key: 'Stack',
+            Value: 'Service'
           })
         ])
       });

@@ -1,8 +1,10 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VPCStack } from '../lib/vpc-stack';
+import { KMSStack } from '../lib/kms-stack';
 import { ServiceStack } from '../lib/service-stack';
 import { MonitoringStack } from '../lib/monitoring-stack';
+
 
 const app = new cdk.App();
 
@@ -30,6 +32,11 @@ const vpcStack = new VPCStack(app, `VPCStack-${envName}`, {
   vpcCidr,
 });
 
+const kmsStack = new KMSStack(app, `KMSStack-${envName}`, {
+  ...commonProps,
+  envName,
+});
+
 const serviceStack = new ServiceStack(app, `ServiceStack-${envName}`, {
   ...commonProps,
   envName,
@@ -37,6 +44,7 @@ const serviceStack = new ServiceStack(app, `ServiceStack-${envName}`, {
   desiredCount,
   cpu,
   memory,
+  secretsKey: kmsStack.secretsKey, 
 });
 
 const monitoringStack = new MonitoringStack(app, `MonitoringStack-${envName}`, {
@@ -49,4 +57,5 @@ const monitoringStack = new MonitoringStack(app, `MonitoringStack-${envName}`, {
 
 // To maintain creation flow
 serviceStack.addDependency(vpcStack);
+serviceStack.addDependency(kmsStack);
 monitoringStack.addDependency(serviceStack);
